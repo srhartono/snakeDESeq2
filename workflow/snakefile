@@ -1,0 +1,26 @@
+#ALWAYS FIRST ONE
+folder=
+rule all:
+    input:
+        "analysis/output.pdf"
+
+rule create_env:
+    output:
+        "envs/DRIPc.yaml"
+    shell:
+        """
+        conda env create --name DRIPc --file envs/DRIPc.yaml
+        """
+
+rule run_DESeq2_DRIPc:
+    conda:
+        "envs/DESeq2.yaml"
+    input:
+        script="DESeq2_{file}.R",
+        counts="{file}.counts"
+    output:
+        "{input.counts}_DESeq2/output.pdf"
+    shell:
+        """
+        Rscript --vanilla {input.script} {input.counts} {output}
+        """

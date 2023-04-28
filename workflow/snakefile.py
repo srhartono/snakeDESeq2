@@ -62,27 +62,36 @@ for ext in myconfig:
 
 A_init_dir_and_files_output = [v.strip('"') for v in A_init_dir_and_files_output]
 
+def joinz(sep,file):
+	return(sep.join(file))
+
+print("\n\n- ",joinz('\n- ',A_init_dir_and_files_output),"\n\n")
 
 #ALWAYS FIRST ONE
 rule all:
 	input:
-		A_init_dir_and_files_output
+		A_init_dir_and_files_output + ["workflow/counts/RNA.counts"]
 
 #make $MAIN_DIR/envs
 rule A_init_dir_and_files:
 	input:
-		f"{MAIN_DIR}" + "/{fileName}.{ext}"
+		f"{MAIN_DIR}"+"/{fileName}.{ext}"
 	output:
-		f"{MAIN_DIR}" + "/workflow/{ext}/{fileName}.{ext}"
+		f"{MAIN_DIR}"+"/workflow/{ext}/{fileName}.{ext}"
 	shell:
 		"/bin/ln -s {input} {output}"
 
+#dirinput=f"{MAIN_DIR}"+"/workflow/count/"
+#print(dirinput)
+
+#Binput = expand(f"{MAIN_DIR}" + "/workflow/count/{fileName}.count",fileName=myconfig["count"])
+#print("\n\n- ",joinz("\n- ",Binput),"\n\n")
+
 rule B_CombineCount:
 	input:
-		f"{MAIN_DIR}" + "/workflow/count/{fileName}.count"
-	params:
-		dir=f"{MAIN_DIR}"
+		countFile="workflow/count/",
+		bed8="workflow/bed8/RNA.bed8"
 	output:
-		f"{MAIN_DIR}" + "/workflow/counts/RNA.counts"
+		"workflow/counts/RNA.counts"
 	shell:
-		"CombineCount.pl -i ./ -o {params.dir}/workflow/counts/{fileName}.counts -b {params.dir}/workflow/counts/RNA.bed8"
+		"CombineCount.pl -i {input.countFile} -o {output} -b {input.bed8}"
